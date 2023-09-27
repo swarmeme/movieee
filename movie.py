@@ -68,6 +68,19 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 x_train
 # %%
 y_train
+#%%
+#label encoding is done to convert string to int
+# Import the LabelEncoder
+from sklearn.preprocessing import LabelEncoder
+
+# Initialize the label encoder
+label_encoder = LabelEncoder()
+
+# Fit and transform the 'title' column in y_train
+y_train_encoded = label_encoder.fit_transform(y_train.astype(str))
+#%%
+y_train_encoded
+
 # %%
 training = x_train.join(y_train)
 # %%
@@ -88,6 +101,7 @@ plt.show()
 training
 # %%
 training.drop(columns = 'timestamp', inplace = True)
+x_test.drop(columns = 'timestamp', inplace = True)
 # %%
 training
 # %%
@@ -95,17 +109,36 @@ from keras import Sequential
 from keras.layers import Dense
 neunet = Sequential()
 # %%
-neunet.add(Dense(64, activation='relu', input_shape=(training.shape[1],)))
+neunet.add(Dense(64, activation='relu', input_shape=(x_train.shape[1],)))
 neunet.add(Dense(32, activation='relu'))
-neunet.add(Dense(16, activation='relu'))
+neunet.add(Dense(1, activation='sigmoid'))
+
+#turning y into 2D array
+y_train_encoded = np.reshape(y_train_encoded, (-1, 1))
 # %%
 x_train = np.array(x_train)
-y_train = np.array(y_train)
+y_train_encoded = np.array(y_train_encoded)
 # %%
-neunet.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-# %%
-y_train.dtype
-#
+import tensorflow.keras as keras
 
+from keras import optimizers
+#%%
+optimizer = keras.optimizers.Adam(learning_rate=0.001) 
+neunet.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 # %%
-final_network = neunet.fit(x_train, y_train, epochs=10, batch_size=64)
+y_train_encoded.dtype
+# %%
+final_network = neunet.fit(x_train, y_train_encoded, epochs=5, batch_size=64)
+# %%
+# Fit and transform the 'y_test' labels
+y_test_encoded = label_encoder.fit_transform(y_test)
+#%%
+
+x_test = np.asarray(x_test)
+y_test_encoded = np.asarray(y_test_encoded)
+# %%
+loss, accuracy = neunet.evaluate(x_test, y_test_encoded)
+# %%
+loss
+# %%
+accuracy
