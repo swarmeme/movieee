@@ -122,18 +122,19 @@ y_train_encoded = np.array(y_train_encoded)
 import tensorflow.keras as keras
 
 from keras import optimizers
+
 #%%
 optimizer = keras.optimizers.Adam(learning_rate=0.001) 
-neunet.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+neunet.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
 # %%
 y_train_encoded.dtype
 # %%
-final_network = neunet.fit(x_train, y_train_encoded, epochs=5, batch_size=64)
+final_network = neunet.fit(x_train, y_train_encoded, epochs=70, batch_size=64, validation_split=0.2)
 # %%
 # Fit and transform the 'y_test' labels
 y_test_encoded = label_encoder.fit_transform(y_test)
-#%%
 
+#%%
 x_test = np.asarray(x_test)
 y_test_encoded = np.asarray(y_test_encoded)
 # %%
@@ -142,3 +143,5 @@ loss, accuracy = neunet.evaluate(x_test, y_test_encoded)
 loss
 # %%
 accuracy
+
+# %%
