@@ -116,13 +116,13 @@ output_layer = Dense(1, activation='linear')(dense_layer_1)
 model = Model(inputs=[input_genre, input_title], outputs=output_layer)
 #%%
 # Compile the model
-model.compile(optimizer='adam', loss='mean_squared_error')
+model.compile(optimizer='sgd', loss='mean_squared_error')
 #%%
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
 #%%
 # Train the model
-model.fit([X_train.iloc[:, 1:], X_train['title']], y_train, epochs=10, batch_size=64, validation_split=0.2)
+model.fit([X_train.iloc[:, 1:], X_train['title']], y_train, epochs=150, batch_size=32, validation_split=0.2)
 #%%
 # Evaluate the model on the test set
 predictions = model.predict([X_test.iloc[:, 1:], X_test['title']])
@@ -136,75 +136,3 @@ from sklearn.metrics import r2_score
 r_squared = r2_score(y_test, predictions)
 #%%
 r_squared
-# %%
-# Perform one-hot encoding for genres
-genre_dummies = pd.get_dummies(merged['PrimaryGenre'], prefix='genre', prefix_sep='_')
-#%%
-genre_dummies = genre_dummies.astype(int) #0s and 1s instead of stringa
-
-#%%
-# Concatenate the one-hot encoded genre columns with the original DataFrame
-merged = pd.concat([merged, genre_dummies], axis=1)
-# Drop the 'PrimaryGenre' column as it's no longer needed
-merged.drop(columns=['PrimaryGenre'], inplace=True)
-
-# %%
-merged
-# %%
-x = merged.drop('title', axis=1)
-y = merged['title']
-#%%
-# Calculate the total count of movies in each genre
-genre_counts = merged.iloc[:, 5:].sum()  # Assuming the one-hot encoded genre columns start from the 5th column
-
-# Create a bar graph
-plt.figure(figsize=(12, 6))
-genre_counts.plot(kind='bar', color='steelblue')
-plt.title('Number of Movies per Genre')
-plt.xlabel('Genre')
-plt.ylabel('Count')
-plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
-plt.tight_layout()
-plt.show()
-# %%
-from sklearn.model_selection import train_test_split
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-# %%
-x_train
-# %%
-y_train
-#%%
-#label encoding is done to convert string to int
-# Import the LabelEncoder
-from sklearn.preprocessing import LabelEncoder
-
-# Initialize the label encoder
-label_encoder = LabelEncoder()
-y_encoded = label_encoder.fit_transform(y.astype(str))
-y_train_encoded, y_test_encoded = train_test_split(y_encoded, test_size=0.2, random_state=42)
-# %%
-training = x_train.join(y_train)
-# %%
-training
-# %%
-training.hist(figsize=(15,8))
-# %%
-numeric_columns = training.select_dtypes(include=['number'])
-
-# Create a correlation matrix for numeric columns
-correlation_matrix = numeric_columns.corr()
-
-# Create the heatmap
-plt.figure(figsize=(10, 8))
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
-plt.show()
-# %%
-training
-# %%
-training.drop(columns = 'timestamp', inplace = True)
-x_test.drop(columns = 'timestamp', inplace = True)
-# %%
-training
-# %%
-
-# %%
