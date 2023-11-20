@@ -33,8 +33,6 @@ merged.head()
 # Calculate the weighted average rating for each movie based on its primary genre
 movie_avg_ratings = merged.groupby(['movieId', 'title', 'PrimaryGenre'])['rating'].agg(['mean', 'count']).reset_index()
 movie_avg_ratings.columns = ['movieId', 'title', 'PrimaryGenre', 'mean_rating', 'rating_count']
-
-
 # Merge the calculated ratings back into the main dataset
 merged = pd.merge(merged, movie_avg_ratings, on=['movieId', 'title', 'PrimaryGenre'])
 
@@ -70,14 +68,13 @@ from keras.models import Model
 from keras.layers import Input, Embedding, Flatten, Dense, Concatenate
 from sklearn.preprocessing import LabelEncoder
 #%%
-# Assuming merged DataFrame is your dataset
 features = merged[['movieId', 'title', 'PrimaryGenre']]
 target = merged['mean_rating']
 #%%
 # Drop rows with missing values
 features = features.dropna(subset=['movieId', 'title', 'PrimaryGenre'])
 #%%
-# Convert 'movieId' to numeric
+
 features['movieId'] = pd.to_numeric(features['movieId'], errors='coerce')
 #%%
 # Drop rows with NaN in 'movieId'
@@ -122,7 +119,7 @@ model.compile(optimizer='sgd', loss='mean_squared_error')
 X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
 #%%
 # Train the model
-model.fit([X_train.iloc[:, 1:], X_train['title']], y_train, epochs=150, batch_size=32, validation_split=0.2)
+model.fit([X_train.iloc[:, 1:], X_train['title']], y_train, epochs=80, batch_size=32, validation_split=0.2)
 #%%
 # Evaluate the model on the test set
 predictions = model.predict([X_test.iloc[:, 1:], X_test['title']])
@@ -130,9 +127,4 @@ mse = mean_squared_error(y_test, predictions)
 
 #%%
 mse
-#%%
-from sklearn.metrics import r2_score
 
-r_squared = r2_score(y_test, predictions)
-#%%
-r_squared
